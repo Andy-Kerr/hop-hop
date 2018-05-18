@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hop Hop: Joey's Adverture Around Canberra</title>
+</head>
+
+<body>
+  <style type="text/css" media="screen">
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    @font-face {
+      font-family: Canberra;
+      src: url('Resources/Canberra.ttf');
+    }
+
+    canvas {
+      font-family: Canberra;
+    }
+  </style>
+
+  <canvas id="canvas" width="400" height="400" style="background-color: #fff"></canvas>
+
+  <div style="display:none;">
+    <img src="Resources/UI/home.png" id="home">
+    <img src="Resources/UI/nextlevel.png" id="nextlevel">
+    <img src="Resources/UI/mapicon.png" id="mapicon">
+    <img src="Resources/UI/end.png" id="end">
+    <img src="Resources/UI/i.png" id="i">
+    <img src="Resources/UI/instr.png" id="instr">
+    <img src="Resources/UI/Stages/Map1.png" id="Map1">
+    <img src="Resources/UI/Stages/Map2.png" id="Map2">
+    <img src="Resources/UI/Stages/Map3.png" id="Map3">
+    <img src="Resources/UI/Stages/Map4.png" id="Map4">
+    <img src="Resources/UI/Stages/Map5.png" id="Map5">
+    <img src="Resources/UI/Stages/Map6.png" id="Map6">
+    <img src="Resources/UI/Stages/Map7.png" id="Map7">
+    <img src="Resources/UI/Worlds/ls1.png" id="ls1">
+    <img src="Resources/UI/Worlds/ls2.png" id="ls2">
+    <img src="Resources/UI/Worlds/ls3.png" id="ls3">
+    <img src="Resources/UI/Worlds/ls4.png" id="ls4">
+    <img src="Resources/UI/Worlds/dam.png" id="dam%">
+    <img src="Resources/UI/Worlds/sievx.png" id="sievx%">
+    <img src="Resources/UI/Worlds/parl.png" id="parl%">
+    <img src="Resources/UI/Worlds/lib.png" id="lib%">
+    <img src="Resources/UI/Worlds/flor.png" id="flor%">
+    <img src="Resources/UI/Worlds/museum.png" id="museum%">
+    <img src="Resources/UI/Worlds/bm.png" id="bm%">
+    <img src="Resources/backgrounds/dam.png" id="dam">
+    <img src="Resources/backgrounds/sievx.png" id="sievx">
+    <img src="Resources/backgrounds/parl.png" id="parl">
+    <img src="Resources/backgrounds/lib.png" id="lib">
+    <img src="Resources/backgrounds/flor.png" id="flor">
+    <img src="Resources/backgrounds/museum.png" id="museum">
+    <img src="Resources/backgrounds/bm.png" id="bm">
+    <img src="Resources/sprites/kang.png" id="kang">
+    <img src="Resources/sprites/hat.png" id="hat">
+    <img src="Resources/sprites/fence.png" id="hf">
+    <img src="Resources/sprites/low fence.png" id="lf">
+    <img src="Resources/sprites/wall.png" id="hw">
+    <img src="Resources/sprites/low wall.png" id="lw">
+    <img src="Resources/sprites/bush.png" id="bush">
+    <img src="Resources/sprites/fin.png" id="fin">
+    <img src="Resources/sprites/bus.png" id="bus">
+    <img src="Resources/sprites/busstop.png" id="busstop">
+    <img src="Resources/sprites/car1.png" id="car1">
+    <img src="Resources/sprites/car2.png" id="car2">
+    <img src="Resources/sprites/car3.png" id="car3">
+    <img src="Resources/sprites/limo.png" id="limo">
+    <img src="Resources/sprites/police.png" id="police">
+    <img src="Resources/sprites/sievx 1.png" id="sievx1">
+    <img src="Resources/sprites/sievx 2.png" id="sievx2">
+    <img src="Resources/sprites/sievx 3.png" id="sievx3">
+    <img src="Resources/sprites/tree.png" id="tree">
+    <img src="Resources/sprites/tree big.png" id="bigtree">
+  </div>
+
+  <script>
+    var hopLvl = localStorage.getItem("HopLvl");
+    var hopLoc = localStorage.getItem("HopLoc");
+
+    if (localStorage.getItem("HopPlay") !== "Hello") {
+      localStorage.setItem("HopLvl", "11");
+      localStorage.setItem("HopHS", "0");
+      localStorage.setItem("HopLoc", "Home");
+      hopLvl = "11";
+      hopLoc = "Home";
+    }
+    localStorage.setItem("HopPlay", "Hello");
+
+    //Hoploc = Home, WorldSel, W1, W2, W3, W4, W5, W6, W7, Game{lvl}{world}
+    //"Game97" is endless mode
+
+    if (hopLoc === "Home") {
+      home()
+    }
+    if (hopLoc === "WorldSel") {
+      worldSel()
+    }
+    if (hopLoc.length == 2) {
+      worlds(parseInt(hopLoc.substring(1, 2)))
+      //to world number
+    }
+    if (hopLoc.substring(0, 4) == "Game") {
+      play(parseInt(hopLoc.substring(4, 5)), parseInt(hopLoc.substring(5, 6)))
+    }
+
+
+
+
+
+
+
+    function home() {
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var w = 1680,
+        h = 976,
+        xScale = window.innerWidth / w,
+        yScale = window.innerHeight / h,
+        key = [];
+      if (Math.abs(canvas.width / canvas.height - 1680 / 976) < 0.1) {
+        ctx.scale(xScale, yScale);
+      } else {
+        if (xScale > yScale) {
+          ctx.scale(yScale, yScale);
+          xScale = yScale
+        } else {
+          ctx.scale(xScale, xScale);
+          yScale = xScale
+        }
+      }
+      var air = 0;
+      var vel = 0;
+      var bonus = 1;
+      var instr = false;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      canvas.addEventListener("mousedown", function(event) {
+        mouseX = event.x / xScale;
+        mouseY = event.y / yScale;
+        if (mouseY > 400 && mouseY < 850 && !(instr)) {
+          if (mouseX < 580) {
+            localStorage.setItem("HopLoc", "Game97")
+            location.reload();
+          } else if (mouseX < 1040) {
+            localStorage.setItem("HopLoc", "WorldSel")
+            location.reload();
+          }
+        }
+        if (mouseX > w - 150 && mouseY < 150) {
+          instr = !(instr);
+        }
+      });
+
+      update();
+
+      window.addEventListener('keypress', function(e) {
+        if (air == 0) {
+          vel = 30;
+          bonus = 1;
+        } else if (bonus == 1) {
+          vel = 20;
+          bonus = 0;
+        }
+      })
+
+      function update() {
+        vel--;
+        air += vel;
+        if (air < 0) {
+          vel = 0;
+          air = 0;
+        }
+        ctx.drawImage(document.getElementById("home"), 0, 0);
+        ctx.drawImage(document.getElementById("i"), 0, 0);
+        if (localStorage.getItem("HopHat") != "Yes!") {
+          ctx.drawImage(document.getElementById("kang"), 1234, h - air - 250, 300, 225);
+        } else {
+          ctx.drawImage(document.getElementById("hat"), 1234, h - air - 250, 300, 225);
+        }
+        if (instr) {
+          ctx.drawImage(document.getElementById("instr"), 0, 0);
+        }
+        requestAnimationFrame(update);
+      }
+    }
+
+
+
+
+
+
+
+    function worlds(world) {
+      localStorage.setItem("HopLoc", "Home")
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var w = 1680,
+        h = 976,
+        xScale = window.innerWidth / w,
+        yScale = window.innerHeight / h
+      if (Math.abs(canvas.width / canvas.height - 1680 / 976) < 0.1) {
+        ctx.scale(xScale, yScale);
+      } else {
+        if (xScale > yScale) {
+          ctx.scale(yScale, yScale);
+          xScale = yScale
+        } else {
+          ctx.scale(xScale, xScale);
+          yScale = xScale
+        }
+      }
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      var lvln = parseInt(hopLvl.substring(0, 1))
+      if (world !== parseInt(hopLvl.substring(1, 2))) {
+        lvln = 4;
+      }
+
+      canvas.addEventListener("mousedown", function(event) {
+        mouseX = event.x / xScale;
+        mouseY = event.y / yScale;
+        if (mouseX > w - 100 && mouseY > h - 100) {
+          localStorage.setItem("HopLoc", "WorldSel")
+          location.reload();
+        }
+        if (lvln >= 1 && mouseX > 830 && mouseY > 145 && mouseX < 1160 && mouseY < 475) {
+          localStorage.setItem("HopLoc", "Game1" + world.toString())
+          location.reload();
+        }
+        //2
+        if (lvln >= 2 && mouseX > 1200 && mouseY > 145 && mouseX < 1540 && mouseY < 475) {
+          localStorage.setItem("HopLoc", "Game2" + world.toString())
+          location.reload();
+        }
+        //3
+        if (lvln >= 3 && mouseX > 830 && mouseY > 500 && mouseX < 1160 && mouseY < 840) {
+          localStorage.setItem("HopLoc", "Game3" + world.toString())
+          location.reload();
+        }
+        //4
+        if (lvln >= 4 && mouseX > 1200 && mouseY > 500 && mouseX < 1540 && mouseY < 840) {
+          localStorage.setItem("HopLoc", "Game4" + world.toString())
+          location.reload();
+        }
+      });
+
+      update();
+
+      function update() {
+        var worldKeys = ["", "dam%", "sievx%", "parl%", "lib%", "flor%", "museum%", "bm%"]
+        ctx.drawImage(document.getElementById(worldKeys[world]), 0, 0);
+        ctx.drawImage(document.getElementById("mapicon"), 0, 0);
+        ctx.drawImage(document.getElementById("ls" + lvln.toString()), 0, 0)
+        requestAnimationFrame(update);
+      }
+    }
+
+
+
+
+
+
+
+
+
+    function worldSel() {
+      localStorage.setItem("HopLoc", "Home")
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var w = 1680,
+        h = 976,
+        xScale = window.innerWidth / w,
+        yScale = window.innerHeight / h,
+        key = [];
+      if (Math.abs(canvas.width / canvas.height - 1680 / 976) < 0.1) {
+        ctx.scale(xScale, yScale);
+      } else {
+        if (xScale > yScale) {
+          ctx.scale(yScale, yScale);
+          xScale = yScale
+        } else {
+          ctx.scale(xScale, xScale);
+          yScale = xScale
+        }
+      }
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      canvas.addEventListener("mousedown", function(event) {
+        mouseX = event.x / xScale;
+        mouseY = event.y / yScale;
+        var wdn = parseInt(hopLvl.substring(1, 2))
+
+        //1
+        if (wdn >= 1 && mouseX > 10 && mouseY > 580 && mouseX < 315 && mouseY < 700) {
+          localStorage.setItem("HopLoc", "W1")
+          location.reload();
+        }
+        //2
+        if (wdn >= 2 && mouseX > 360 && mouseY > 350 && mouseX < 650 && mouseY < 480) {
+          localStorage.setItem("HopLoc", "W2")
+          location.reload();
+        }
+        //3
+        if (wdn >= 3 && mouseX > 975 && mouseY > 770 && mouseX < 1269 && mouseY < 892) {
+          localStorage.setItem("HopLoc", "W3")
+          location.reload();
+        }
+        //4
+        if (wdn >= 4 && mouseX > 1234 && mouseY > 500 && mouseX < 1530 && mouseY < 620) {
+          localStorage.setItem("HopLoc", "W4")
+          location.reload();
+        }
+        //5
+        if (wdn >= 5 && mouseX > 1280 && mouseY > 220 && mouseX < 1570 && mouseY < 340) {
+          localStorage.setItem("HopLoc", "W5")
+          location.reload();
+        }
+        //6
+        if (wdn >= 6 && mouseX > 840 && mouseY > 325 && mouseX < 1140 && mouseY < 450) {
+          localStorage.setItem("HopLoc", "W6")
+          location.reload();
+        }
+        //7
+        if (wdn >= 7 && mouseX > 470 && mouseY > 30 && mouseX < 766 && mouseY < 150) {
+          localStorage.setItem("HopLoc", "W7")
+          location.reload();
+        }
+        if (mouseY > 850 && mouseX < 200) {
+          localStorage.setItem("HopLoc", "Home")
+          location.reload();
+        }
+      });
+
+      update();
+
+      function update() {
+        ctx.drawImage(document.getElementById("Map" + hopLvl.substring(1, 2)), 0, 0);
+        ctx.fillStyle = "white";
+        ctx.fillRect(w * 0.5 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+        ctx.fillStyle = "black"
+        ctx.font = "70px Canberra";
+        ctx.fillText("\u2302", w * 2.8 / 100, (h) * .955)
+        requestAnimationFrame(update);
+      }
+    }
+
+
+
+
+
+
+
+    function play(level, world) {
+      localStorage.setItem("HopLoc", "Home")
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var w = 1680,
+        h = 976,
+        xScale = window.innerWidth / w,
+        yScale = window.innerHeight / h,
+        key = [];
+      if (Math.abs(canvas.width / canvas.height - 1680 / 976) < 0.1) {
+        ctx.scale(xScale, yScale);
+      } else {
+        if (xScale > yScale) {
+          ctx.scale(yScale, yScale);
+          xScale = yScale
+        } else {
+          ctx.scale(xScale, xScale);
+          yScale = xScale
+        }
+      }
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      var levelData = [
+        //index ZERO
+        [],
+        /*dam*/
+        ["       _  ..  F", "       ,:  :   3   F", "      p     _ _    t     ,;   ;;   F", "     :_   t   l     ,;,  ;    1  F"],
+        /*sievx*/
+        ["     s   sSs  s s  F", "     Ss   t   $   SsS   s s  F", "      s$    SS  T  SS   s  S  s   $  F", "      sS$   SsS  sSs    Ss  sS    T   s  s  F"],
+        /*parliament*/
+        ["      l    ;;  ;,;  p   ;  l   ;, ;;   B  F", "     2  1   ;,;  .:.  l    , ; , ; ,   F", "    l   : : l   p  p  ,;,  ;; ,  ; ,,   B   F", "    ; ,, ;  B    l   ::   ;,;  1   ;; ,;  ; , ,   F"],
+        /*library*/
+        ["      l   :,  ::  :. .:   p   T   t  t F", "    2   T  :.   1   T  :.  :: : :  . .  F", "   3  ,;,  l   :.  :.  :.:  :  T  F", "     _ _  2  b   B    T  ;,;   T  2   T  F"],
+        /*floriade*/
+        ["     T   , T   ,;,  ;;   3   3   ; ; ; ,;; F", "    3   : : . :  1   T  t   ,;,   ::  F", "     1   :.:  ::  T  t   .: .: .:  T  l  ,;,  3    , . ,  F", "   ,;,  ;; ,  ; ,,  1   . . . T    B     t  2   3   ;; ,;  ; , ,  F"],
+        /*museum*/
+        ["     2   .:.  ...  _ t   B    ,;,  T  :.: B    p   , ,  b   , ,, ,, ,  :.:  F", "   ,;,   b   .. .. :. :.: t    B      t  2  ;,  ,, , 1   ,;  ;,  p    F", "    l    :. t   :. t  b  2    B     , ,  T  t  ;; ;;  ,;, ;,;   3   t    F",
+          "    ::  T  t   2  .: .: .:  p   ,;,  3   B     ,;,  , , ;  ,, ; l   :.: :.: t   F"
+        ],
+        /*black mtn*/
+        ["   :: :: :,: :  T t  B    , , ;;  2   .: ,; .: t  p  l    . _ . ,  T   :. 2  :.   B    F", "    .... t  l   B     b  ,;, ,;, ,; ;, t  p  2    :: _ :.:   tt  F",
+          "    ;, t l    , ,,  ,T   B     3  , ; :. :. :.  b   T t  . .. .. :.: 1   B    ;, p   , ;,;  T   F",
+          "     ._ _. .: l   T    B    ,;, :.: ,;, :.: ,;, :. :. :. t   l      _ _ _  T   2  1   b    ,, , . _ , .  T , ,. . _ ,  T , .,    ....   F"
+        ]
+      ];
+      if (level == 9) {
+        course = "   ";
+        for (var i = 0; i < 1000; i++) {
+          var optionsc = "  pl321bBTtSs$__::..,,;;              ";
+          var indexc = Math.floor(Math.random() * optionsc.length)
+          try {
+            course += optionsc.substring(indexc - 1, indexc) + "  ";
+          } catch (err) {
+            course += " ";
+          }
+        }
+      } else {
+        var course = levelData[world][level - 1];
+      }
+      var air = 0;
+      var vel = 0;
+      var sp = 500;
+      var t = 0;
+      var bt = 0;
+      var bonus = 1;
+      var bouncable = true;
+      var speed = 20;
+      var running = true;
+      update();
+
+      window.addEventListener('keypress', function(e) {
+        if (air == 0) {
+          vel = 30;
+          bonus = 1;
+          bouncable = false;
+          bt = 50;
+        } else if (bonus == 1) {
+          vel = 20;
+          bonus = 0;
+        }
+      })
+
+
+      function update() {
+        t += speed;
+        bt += speed;
+        vel--;
+        air += vel;
+        if (air < 0) {
+          vel = 0;
+          air = 0;
+          if (bouncable == false) {
+            bt = 0;
+          }
+          bouncable = true;
+        }
+        backKeys = ["", "dam", "sievx", "parl", "lib", "flor", "museum", "bm"]
+        ctx.drawImage(document.getElementById(backKeys[world]), -t / 50, 0);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, h, w, 100);
+        ctx.font = '100px Canberra';
+        ctx.textAlign = 'center';
+        if (level == 9) {
+          ctx.fillText(Math.floor(t / 1000).toString(), 120, 60)
+        } else {
+          var worldNameIndex = ["", "National Zoo", "SIEV X", "Parliament House", "National Library", "Floriade", "National Museum", "Black Mountain"];
+          ctx.textAlign = 'left';
+          ctx.fillText(("Level " + level.toString() + ",  " + worldNameIndex[world]), 1200 - t / 2, 60);
+        }
+        ctx.textAlign = 'center';
+        ctx.drawImage(document.getElementById((localStorage.getItem("HopHat") == "Yes!") ? "hat" : "kang"), 200, h - air - ((bouncable) ? (Math.abs(Math.sin(bt / 200) * 100)) : 0) - 250, 300, 225);
+        for (var i = 0; i < course.length; i++) {
+          if (course.charAt(i) == ".") {
+            ctx.drawImage(document.getElementById("lw"), sp * i - t, h - 150, 150, 150);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 150, -150);
+            test();
+          }
+          if (course.charAt(i) == ",") {
+            ctx.drawImage(document.getElementById("lf"), sp * i - t, h - 150, 150, 150);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 150, -150);
+            test();
+          }
+          if (course.charAt(i) == ":") {
+            ctx.drawImage(document.getElementById("hw"), sp * i - t, h - 300, 150, 300);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 150, -300);
+
+            test();
+          }
+          if (course.charAt(i) == ";") {
+            ctx.drawImage(document.getElementById("hf"), sp * i - t, h - 300, 150, 300);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 150, -300);
+
+            test();
+          }
+          if (course.charAt(i) == "_") {
+            ctx.drawImage(document.getElementById("bush"), sp * i - t, h - 176, 384, 176);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 384, -176);
+
+            test();
+          }
+          if (course.charAt(i) == "$") {
+            ctx.drawImage(document.getElementById("sievx1"), sp * i - t, h - 513, 80, 513);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 80, -513);
+            test();
+          }
+          if (course.charAt(i) == "S") {
+            ctx.drawImage(document.getElementById("sievx2"), sp * i - t, h - 389, 80, 389);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 80, -389);
+            test();
+          }
+          if (course.charAt(i) == "s") {
+            ctx.drawImage(document.getElementById("sievx3"), sp * i - t, h - 264, 80, 264);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 80, -264);
+            test();
+          }
+          if (course.charAt(i) == "t") {
+            ctx.drawImage(document.getElementById("tree"), sp * i - t, h - 469, 244, 469);
+            ctx.beginPath();
+            ctx.rect(sp * i - t + 100, h, 44, -469);
+            test();
+          }
+          if (course.charAt(i) == "T") {
+            ctx.drawImage(document.getElementById("bigtree"), sp * i - t, h - 520, 270, 520);
+            ctx.beginPath();
+            ctx.rect(sp * i - t + 100, h, 70, -520);
+            test();
+          }
+          if (course.charAt(i) == "B") {
+            ctx.drawImage(document.getElementById("bus"), sp * i - t, h - 300, 1318, 300);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 1318, -300);
+            test();
+          }
+          if (course.charAt(i) == "b") {
+            ctx.drawImage(document.getElementById("busstop"), sp * i - t, h - 320, 300, 320);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 300, -320);
+            test();
+          }
+          if (course.charAt(i) == "1") {
+            ctx.drawImage(document.getElementById("car1"), sp * i - t, h - 230, 690, 230);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 690, -180);
+            test();
+          }
+          if (course.charAt(i) == "2") {
+            ctx.drawImage(document.getElementById("car2"), sp * i - t, h - 230, 690, 230);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 690, -180);
+            test();
+          }
+          if (course.charAt(i) == "3") {
+            ctx.drawImage(document.getElementById("car3"), sp * i - t, h - 230, 690, 230);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 690, -180);
+            test();
+          }
+          if (course.charAt(i) == "l") {
+            ctx.drawImage(document.getElementById("limo"), sp * i - t, h - 230, 1145, 230);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 1145, -180);
+            test();
+          }
+          if (course.charAt(i) == "p") {
+            ctx.drawImage(document.getElementById("police"), sp * i - t, h - 230, 800, 230);
+            ctx.beginPath();
+            ctx.rect(sp * i - t, h, 800, -180);
+            test();
+          }
+          if (course.charAt(i) == "F") {
+            ctx.drawImage(document.getElementById("fin"), sp * i - t, h - 340, 250, 340);
+            if (sp * i - t < 500) {
+              if (speed > 0) {
+                speed -= 0.5;
+                bt = 0;
+              }
+            }
+          }
+        }
+        if (speed <= 0 && !(level == 4 && world == 7)) {
+          if (parseInt(hopLvl.split("").reverse().join("")) <= world * 10 + level) {
+            if (level == 4) {
+              localStorage.setItem("HopLvl", (1).toString() + (world + 1).toString())
+            } else {
+              localStorage.setItem("HopLvl", (level + 1).toString() + (world).toString())
+            }
+          }
+          ctx.textAlign = "center";
+          ctx.fillStyle = "white";
+          if (world == 1) {
+            ctx.fillStyle = "black";
+          }
+          ctx.font = "170px Canberra";
+          ctx.fillText("Great Work!", w / 2, h * 0.2)
+          ctx.drawImage(document.getElementById("nextlevel"), 0, 0);
+          ctx.fillStyle = "white";
+          ctx.fillRect(w * 0.5 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+          ctx.fillStyle = "black"
+          ctx.font = "70px Canberra";
+          ctx.fillText("\u2302", w * 2.8 / 100, (h) * .955)
+          ctx.drawImage(document.getElementById("kang"), 200, h - air - ((bouncable) ? (Math.abs(Math.sin(bt / 200) * 100)) : 0) - 250, 300, 225);
+
+          canvas.addEventListener("mousedown", function(event) {
+            mouseX = event.x / xScale;
+            mouseY = event.y / yScale;
+            if (mouseY > 850 && mouseX < 200) {
+              localStorage.setItem("HopLoc", "Home")
+              location.reload();
+            }
+            if (mouseX > w - 500 && mouseY > h - 500) {
+              if (level == 4) {
+                localStorage.setItem("HopLoc", "W" + (world + 1).toString())
+                location.reload();
+              } else {
+                localStorage.setItem("HopLoc", "Game" + (level + 1).toString() + (world).toString())
+                location.reload();
+              }
+            }
+
+          });
+        } else if (speed <= 0) {
+          localStorage.setItem("HopHat", "Yes!")
+          ctx.textAlign = "center";
+          ctx.fillStyle = "white";
+          ctx.fillRect(w * 0.5 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+          ctx.fillStyle = "black"
+          ctx.font = "70px Canberra";
+          ctx.fillText("\u2302", w * 2.8 / 100, (h) * .955)
+          ctx.drawImage(document.getElementById('end'), 0, 0);
+          ctx.drawImage(document.getElementById("hat"), 200, h - air - ((bouncable) ? (Math.abs(Math.sin(bt / 200) * 100)) : 0) - 250, 300, 225);
+
+          canvas.addEventListener("mousedown", function(event) {
+            mouseX = event.x / xScale;
+            mouseY = event.y / yScale;
+            if (mouseY > 850 && mouseX < 200) {
+              localStorage.setItem("HopLoc", "Home")
+              location.reload();
+            }
+          });
+        }
+        ctx.fillStyle = "white";
+        ctx.fillRect(w, 0, 10 * w, h);
+
+        if (running) {
+          requestAnimationFrame(update);
+        }
+      }
+
+
+
+      function test() {
+        if (ctx.isPointInPath(350 * xScale, (h - air - ((bouncable) ? (Math.abs(Math.sin(bt / 200) * 100)) + 50 : 50)) * yScale)) {
+          running = false;
+
+          if (level == 9) {
+            var score = Math.floor(t / 1000)
+            var pastHS = parseInt(localStorage.getItem("HopHS"))
+            if (score > pastHS) {
+              localStorage.setItem("HopHS", score.toString());
+            }
+            setTimeout(function() {
+              ctx.drawImage(document.getElementById(backKeys[world]), -t / 50, 0);
+              ctx.textAlign = "center"
+              ctx.fillStyle = "white"
+              ctx.fillRect(w / 7, h / 2.5, w / 3.5, h / 2.5)
+              ctx.fillRect(w * 4 / 7, h / 2.5, w / 3.5, h / 2.5)
+              ctx.fillStyle = "black";
+              ctx.font = "80px Canberra";
+              ctx.fillText("Highscore", w * 5 / 7, (h) * 6.7 / 14)
+              ctx.fillText("Score", w * 2 / 7, (h) * 6.7 / 14)
+              ctx.font = "200px Canberra";
+              ctx.fillText(score.toString(), w * 2 / 7, h * 4.6 / 7)
+              ctx.fillText(pastHS.toString(), w * 5 / 7, h * 4.6 / 7)
+              ctx.fillStyle = "white";
+              ctx.fillText("You Died!", w / 2, h * 0.2)
+              ctx.fillRect(w * 95 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+              ctx.fillRect(w * 0.5 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+              ctx.fillStyle = "black";
+              ctx.font = "70px Canberra";
+              ctx.fillText("\u21BB", w * 97.2 / 100, (h) * .955)
+              ctx.fillText("\u2302", w * 2.8 / 100, (h) * .955)
+              ctx.fillStyle = "white";
+              ctx.fillRect(w, 0, 10 * w, h);
+            }, 50);
+            setTimeout(function() {
+              window.addEventListener('keypress', function(e) {
+                localStorage.setItem("HopLoc", "Game97")
+                location.reload();
+              })
+            }, 600);
+          } else {
+            setTimeout(function() {
+              ctx.drawImage(document.getElementById(backKeys[world]), -t / 50, 0);
+              ctx.textAlign = "center";
+              ctx.fillStyle = "white";
+              if (world == 1) {
+                ctx.fillStyle = "black";
+              }
+              ctx.font = "200px Canberra";
+              ctx.fillText("You Died!", w / 2, h * 0.2)
+              ctx.fillStyle = "white";
+              ctx.fillRect(w * 0.5 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+              ctx.fillRect(w * 95 / 100, h * 91 / 100, w * 4.5 / 100, h * 8 / 100)
+              ctx.fillRect(w / 2 - h / 5, h * 2 / 5, h * 2 / 5, h * 2 / 5)
+              ctx.fillStyle = "black"
+              ctx.font = "70px Canberra";
+              ctx.fillText("\u2302", w * 2.8 / 100, (h) * .955)
+              ctx.fillText("\u2192", w * 97.2 / 100, (h) * .955)
+              ctx.font = "360px Canberra";
+              ctx.fillText("\u21BB", w / 2, h * 3.1 / 5)
+              ctx.fillStyle = "white";
+              ctx.fillRect(w, 0, 10 * w, h);
+            }, 50);
+            setTimeout(function() {
+              window.addEventListener('keypress', function(e) {
+                localStorage.setItem("HopLoc", "Game" + level.toString() + world.toString())
+                location.reload();
+              })
+            }, 600);
+          }
+          canvas.addEventListener("mousedown", function(event) {
+            mouseX = event.x / xScale;
+            mouseY = event.y / yScale;
+            if (mouseY > 850 && mouseX < 200) {
+              localStorage.setItem("HopLoc", "Home")
+              location.reload();
+            }
+            if (level == 9) {
+              if (mouseY > 850 && mouseX > w - 200) {
+                localStorage.setItem("HopLoc", "Game97")
+                location.reload();
+              }
+            } else {
+              if (mouseX > w / 2 - h / 5 && mouseY > h * 2 / 5 && mouseX < w / 2 + h / 5 && mouseY < h * 4 / 5) {
+                localStorage.setItem("HopLoc", "Game" + level.toString() + world.toString())
+                location.reload();
+              }
+              if (mouseY > 850 && mouseX > w - 200) {
+                localStorage.setItem("HopLoc", "W" + world.toString())
+                location.reload();
+              }
+            }
+          });
+        }
+
+      }
+    }
+  </script>
+</body>
+
+</html>
